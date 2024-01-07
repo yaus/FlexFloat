@@ -29,20 +29,39 @@ class FlexFloat:
 
     @property
     def s(self) -> bool:
+        """
+        Sign
+        :return:
+        """
         return self._s
 
     @property
     def e(self) -> int:
+        """
+        Exponent
+        :return:
+        """
         return self._e
 
     @property
     def m(self) -> int:
+        """
+        Mantissa
+        :return:
+        """
         return self._m
 
     def __class_getitem__(cls, item: tuple[int, int] | tuple[int, int, bool]) -> type["FlexFloat"]:
-        e, m = item
+        """
+        Return a class object with specified width for exponent and mantissa
+        :param item: (e_width, m_width) or (e_width, m_width, denormal)
+        :return: FlexFloat class object
+        """
+        e, m, *d = item
         if e <= 0 or m <= 0:
             raise ValueError(f'[e,m]: e or m must be nature number')
+        if d is None:
+            d = False
 
         _e = FlexFloat._class_storage.setdefault(e, {})
 
@@ -60,6 +79,10 @@ class FlexFloat:
 
     @classproperty
     def exponent_offset(cls):
+        """
+        Offset of exponent
+        :return:
+        """
         return 2 ** (cls.e_width - 1) - 1
 
     def _add_(self, other: Self) -> Self:
@@ -98,9 +121,17 @@ class FlexFloat:
         return
 
     def compatible(self, other):
+        """
+        Check compatibility of two FlexFloat
+        :param other: FlexFloat
+        :return: compatible or not
+        """
         return self.m_width == other.m_width and self.e_width == other.e_width
 
-        pass
 
     def is_zero(self):
+        """
+        Check if the number is zero
+        :return:
+        """
         return self._e == 0 and self._m == 0
