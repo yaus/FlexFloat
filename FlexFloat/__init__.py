@@ -1,9 +1,9 @@
-from typing import ClassVar, Self, Type
+from typing import ClassVar, Self
 
 
 class FlexFloat:
     from numbers import Number
-    from ClassPropertyDescriptor import classproperty
+    from FlexFloat.ClassPropertyDescriptor import classproperty
 
     e_width: ClassVar[int] = 1
     m_width: ClassVar[int] = 1
@@ -31,7 +31,7 @@ class FlexFloat:
     def s(self) -> bool:
         """
         Sign
-        :return:
+        :return: sign
         """
         return self._s
 
@@ -39,7 +39,7 @@ class FlexFloat:
     def e(self) -> int:
         """
         Exponent
-        :return:
+        :return: exponent
         """
         return self._e
 
@@ -47,7 +47,7 @@ class FlexFloat:
     def m(self) -> int:
         """
         Mantissa
-        :return:
+        :return: mantissa
         """
         return self._m
 
@@ -111,6 +111,22 @@ class FlexFloat:
             if self.compatible(other):
                 return self._add_(other)
 
+    def __sub__(self, other: Number | Self) -> Self:
+        if isinstance(other, FlexFloat):
+            if self.compatible(other):
+                return self._add_(-other)
+
+    def __neg__(self):
+        return self.__class__(not self.s, self._e, self._m)
+
+    def __mul__(self, other: Number | Self) -> Self:
+        if isinstance(other, FlexFloat):
+            if self.compatible(other):
+                _s = self.s != other.s
+                _e = self._e + other._e - self.exponent_offset
+                _m = self._m * other._m
+
+
     def __repr__(self):
         sign_str = '-' if self.s else '+'
         m_str = f"{(self._m / self._m_one): 1.10f}"
@@ -118,7 +134,6 @@ class FlexFloat:
             return f"{sign_str}{0}.{0}"
         else:
             return f"{sign_str}{1}.{m_str[3:]}*2^{self._e - self.exponent_offset}"
-        return
 
     def compatible(self, other):
         """
@@ -127,7 +142,6 @@ class FlexFloat:
         :return: compatible or not
         """
         return self.m_width == other.m_width and self.e_width == other.e_width
-
 
     def is_zero(self):
         """
